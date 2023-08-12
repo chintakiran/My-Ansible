@@ -1,0 +1,10 @@
+---
+- name: Installing and uninstallin the S/W
+  hosts: all
+  tasks:
+    - name: installing the tree S/W
+      apt: 
+       name: "{{a}}"
+       state: "{{b}}"
+       update_cache: "{{c}}"
+...
