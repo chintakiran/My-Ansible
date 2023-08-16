@@ -1,0 +1,23 @@
+---
+- name: Implementing the tags
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: installing the git
+      apt:
+        name: git
+        state: present
+        update_cache: yes
+      tags: git_install
+    - name: creation of users
+      user:
+        name: gunesh
+        password: 9669
+        uid: 5236
+      tags: creation_users
+    - name: copying the password file
+      copy:
+        src: /etc/passwd
+        dest: /tmp
+...
+
