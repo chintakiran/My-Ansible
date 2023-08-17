@@ -4,33 +4,38 @@
   tasks:
     - name: installing the tomcat9 and tomcat9-admin
       apt:
-         name: "{{item.a}}" 
-         state: "{{item.b}}"
-         update_cache: "{{item.c}}"
+        name: "{{item.a}}"
+        state: "{{item.b}}"
+        update_cache: "{{item.c}}"
       with_items:
-        - {a: tomcat9,b: present,c: yes}
-        - {a: tomcat9-admin,b: present,c: no}
-    - name: copying the tomcat-users.xml file
+         - {a: tomcat9,b: present,c: yes}
+         - {a: tomcat9-admin,b: present,c: no}
+    - name: copying the tomcat-users file
       copy:
-         src: /home/ubuntu/playbooks/tomcat-users.xml
-         dest: /etc/tomcat9
-    - name: changing the port number from 8080 to 9090
+        src: tomcat-users.xml
+        dest: /etc/tomcat9
+
+    - name: replacing the port numbers
       replace:
-         regexp: 8080
-         replace: 9090
-         path: /etc/tomcat9/server.xml
-    - name: restarting the tomcat
+        regexp: 8080
+        replace: 9090
+        path: /etc/tomcat9/server.xml
+    - name: restart the tomcat9
       service:
-         name: tomcat9
-         state: restarted
-    - name: pause for 30 sec
+        name: tomcat9
+        state: restarted
+    - name: pause the tomcat for 30 sec
       pause:
-         seconds: 30
-    - name: checking the response from the servers
+        seconds: 30
+
+    - name: check the response from te url
       uri:
-         url: "{{item.a}}"
-         status_code: "{{item.b}}"
+        url: "{{item}}"
+        status_code: 200
       with_items:
-         - {a: http://18.220.226.43:9090,b: 200}
-         - {a: http://18.116.67.190:9090,b: 200} 
+        - http://3.143.0.49:9090
+        - http://18.221.76.192:9090
 ...
+          
+          
+        

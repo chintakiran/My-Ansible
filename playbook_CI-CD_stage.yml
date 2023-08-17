@@ -1,0 +1,86 @@
+---
+- name: Installing the required s/ws in Devserver
+  hosts: devserver
+  tasks:
+     - name: install git, maven, java
+       apt:
+         name: "{{item.a}}"
+         state: present
+         update_cache: "{{item.b}}"
+       with_items:
+          - {a: openjdk-11-jdk,b: yes}
+          - {a: git,b: no}
+          - {a: maven,b: no}
+- name: Installing the s/w on Qaserver
+  hosts: qaserver
+  tasks:
+     - name: installing the git , tomcat9 and tomcat9-admin,java
+       apt:
+         name: "{{item.a}}"
+         state: present
+         update_cache: "{{item.b}}"
+       with_items:
+         - {a: openjdk-11-jdk,b: yes}
+         - {a: git,b: no}
+         - {a: tomcat9,b: no}
+         - {a: tomcat9-admin,b: no}
+- name: Installing the tomcat9 and tomcat9-admin on prodserver
+  hosts: prodserver
+  tasks:
+     - name: installing the tomcat
+       apt:
+         name: "{{item.a}}"
+         state: present
+         update_cache: "{{item.b}}"
+       with_items: 
+         - {a: tomcat9,b: yes}
+         - {a: tomcat9-admin,b: no}   
+- name: Continuos download and Continuous Build
+  hosts: devserver
+  tasks:
+  - name: downloading code from git
+    git:
+      repo: https://github.com/intelliqittrainings/maven.git
+      dest: dev-git
+  - name: building the artifact
+    shell: cd dev-git;mvn package
+  - name: fetching the artifact
+    fetch:
+      src: dev-git/webapp/target/webapp.war
+      dest: /tmp
+- name: Continuous testing and Continuos Deployment
+  hosts: qaserver
+  tasks:
+    - name: deploy artifact in to tomcat qa server
+      copy:
+        src: /tmp/172.31.14.233/dev-git/webapp/target/webapp.war
+        dest: /var/lib/tomcat9/webapps/testapp.war
+    - name: download the selinium scripts from the git
+      git:
+        repo: https://github.com/intelliqittrainings/FunctionalTesting.git
+        dest: test-git 
+    - name: running the selinium scripts
+      shell: java -jar test-git/testing.jar
+- name: Continuous Delivery
+  hosts: prodserver
+  tasks:
+     - name: deploy artifact in to tomcat prod server
+       copy:
+        src: /tmp/172.31.14.233/dev-git/webapp/target/webapp.war
+        dest: /var/lib/tomcat9/webapps/prodapp.war
+...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
