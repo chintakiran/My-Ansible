@@ -1,0 +1,35 @@
+---
+- name: configuring the tomcat
+  hosts: all
+  tasks:
+    - name: installing tomcat9 and tomcat9-admin
+      apt:
+        name: "{{item.a}}"
+        state: present
+        update_cache: "{{item.b}}"
+      with_items: 
+          - {a: tomcat9,b: yes}
+          - {a: tomcat9-admin,b: no}
+    - name: copy the tomcat-users.xml file
+      copy: 
+        src: /home/ubuntu/playbooks/tomcat-users.xml
+        dest: /etc/tomcat9
+    - name: replace the port numbers
+      replace:
+        regexp: 8080
+        replace: 6060
+        path: /etc/tomcat9/server.xml
+    - name: restart the tomcat server
+      service: 
+        name: tomcat9
+        state: restarted
+    - name: pause the server for 30 sec
+      pause:
+        seconds: 30
+    - name: check the response from the servers
+      uri:
+        url: "{{item}}"
+        status_code: 200
+      with_items:
+        - http://3.145.81.237:6060
+        - http://18.223.171.126:6060
